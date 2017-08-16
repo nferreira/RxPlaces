@@ -1,7 +1,6 @@
 package com.a99.rxplaces
 
-import io.reactivex.FlowableOperator
-import io.reactivex.ObservableOperator
+ import io.reactivex.ObservableOperator
 import io.reactivex.Observer
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
@@ -9,10 +8,6 @@ import io.reactivex.disposables.Disposables
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.observers.SerializedObserver
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subscribers.DisposableSubscriber
-import io.reactivex.subscribers.SerializedSubscriber
-import org.reactivestreams.Subscriber
-import org.reactivestreams.Subscription
 import java.util.concurrent.TimeUnit
 
 class AutocompleteBufferOperator<T>(
@@ -30,7 +25,8 @@ class AutocompleteBufferOperator<T>(
   private inner class AutocompleteBufferOperatorSubscriber<T>(
       val upstreamSubscriber: Observer<in T>
   ) : Observer<T> {
-    override fun onSubscribe(d: Disposable?) {
+    override fun onSubscribe(d: Disposable) {
+
     }
 
     override fun onNext(upstreamData: T) {
@@ -54,7 +50,7 @@ class AutocompleteBufferOperator<T>(
       }
     }
 
-    override fun onError(e: Throwable?) {
+    override fun onError(e: Throwable) {
       if (upstreamSubscriber is DisposableObserver) {
         if (upstreamSubscriber.isDisposed) return
       }
