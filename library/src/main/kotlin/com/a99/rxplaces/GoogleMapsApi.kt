@@ -1,13 +1,13 @@
 package com.a99.rxplaces
 
+import io.reactivex.Maybe
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
-import rx.Single
 
 internal interface GoogleMapsApi {
   @GET("/maps/api/place/autocomplete/json")
@@ -21,13 +21,13 @@ internal interface GoogleMapsApi {
       @Query("types") types: String? = null,
       @Query("components") components: String? = null,
       @Query("strictbounds") strictBounds: Boolean? = null
-  ): Single<PlaceAutocompleteResponse>
+  ): Maybe<PlaceAutocompleteResponse>
 
   @GET("/maps/api/geocode/json")
   fun getReverseGeocode(
       @Query("key") key: String,
       @Query("place_id") placeId: String
-  ): Single<GeocodeResponse>
+  ): Maybe<GeocodeResponse>
 
   companion object {
     const val URL = "https://maps.googleapis.com"
@@ -53,7 +53,7 @@ internal interface GoogleMapsApi {
 
       val retrofit = Retrofit.Builder()
           .baseUrl(URL)
-          .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+          .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
           .addConverterFactory(GsonConverterFactory.create())
           .client(client)
           .build()

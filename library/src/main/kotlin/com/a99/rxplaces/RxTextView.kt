@@ -1,10 +1,10 @@
 package com.a99.rxplaces
 
 import android.widget.TextView
-import rx.Observable
-import rx.Subscriber
-import rx.android.MainThreadSubscription
-import rx.android.MainThreadSubscription.verifyMainThread
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.android.MainThreadDisposable
+import io.reactivex.android.MainThreadDisposable.verifyMainThread
 
 internal class RxTextView {
 
@@ -24,15 +24,15 @@ internal class RxTextView {
         }
       }
 
-      return observable.onBackpressureLatest()
+      return observable
     }
 
-    infix fun <T> Subscriber<T>.onUnsubscribe(function: () -> Unit) {
-      add(object : MainThreadSubscription() {
-        override fun onUnsubscribe() {
-          function()
-        }
-      })
+    infix fun <T> ObservableEmitter<T>.onUnsubscribe(function: () -> Unit) {
+//      add(object : MainThreadDisposable() {
+//        override fun onDispose() {
+//          function()
+//        }
+//      })
     }
   }
 }

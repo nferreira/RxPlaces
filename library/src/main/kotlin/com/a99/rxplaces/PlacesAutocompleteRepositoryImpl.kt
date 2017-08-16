@@ -7,14 +7,14 @@ import com.a99.rxplaces.GoogleMapsApi.Companion.REQUEST_DENIED
 import com.a99.rxplaces.GoogleMapsApi.Companion.UNKNOWN_ERROR
 import com.a99.rxplaces.GoogleMapsApi.Companion.ZERO_RESULTS
 import com.a99.rxplaces.options.AutocompleteOptions
-import rx.Single
+import io.reactivex.Maybe
 
 internal class PlacesAutocompleteRepositoryImpl
 constructor(val apiKey: String, val googleMapsApi: GoogleMapsApi) : PlacesAutocompleteRepository {
 
   override fun query(
       input: String,
-      options: AutocompleteOptions): Single<List<Prediction>> {
+      options: AutocompleteOptions): Maybe<List<Prediction>> {
 
     val single = createAutocompleteQuerySingle(input, options)
         .flatMap { flattenPredictions(it) }
@@ -24,7 +24,7 @@ constructor(val apiKey: String, val googleMapsApi: GoogleMapsApi) : PlacesAutoco
 
   private fun createAutocompleteQuerySingle(
       input: String,
-      options: AutocompleteOptions): Single<PlaceAutocompleteResponse> {
+      options: AutocompleteOptions): Maybe<PlaceAutocompleteResponse> {
 
     return googleMapsApi.getPlaceAutocomplete(
         key = apiKey,
@@ -39,15 +39,15 @@ constructor(val apiKey: String, val googleMapsApi: GoogleMapsApi) : PlacesAutoco
     )
   }
 
-  private fun flattenPredictions(response: PlaceAutocompleteResponse): Single<List<Prediction>> {
+  private fun flattenPredictions(response: PlaceAutocompleteResponse): Maybe<List<Prediction>> {
     return when (response.status) {
-      OK -> Single.fromCallable { response.predictions }
-      ZERO_RESULTS -> Single.fromCallable { emptyList<Prediction>() }
-      OVER_QUERY_LIMIT -> Single.error(OverQueryLimitException(FAILURE_MESSAGE))
-      REQUEST_DENIED -> Single.error(RequestDeniedException(FAILURE_MESSAGE))
-      INVALID_REQUEST -> Single.error(InvalidRequestException(FAILURE_MESSAGE))
-      UNKNOWN_ERROR -> Single.error(UnknownErrorException(FAILURE_MESSAGE))
-      else -> Single.error(Exception(FAILURE_MESSAGE.plus("Status: ${response.status}")))
+      OK -> Maybe.fromCallable { response.predictions }
+      ZERO_RESULTS -> Maybe.fromCallable { emptyList<Prediction>() }
+      OVER_QUERY_LIMIT -> Maybe.error(OverQueryLimitException(FAILURE_MESSAGE))
+      REQUEST_DENIED -> Maybe.error(RequestDeniedException(FAILURE_MESSAGE))
+      INVALID_REQUEST -> Maybe.error(InvalidRequestException(FAILURE_MESSAGE))
+      UNKNOWN_ERROR -> Maybe.error(UnknownErrorException(FAILURE_MESSAGE))
+      else -> Maybe.error(Exception(FAILURE_MESSAGE.plus("Status: ${response.status}")))
     }
   }
 

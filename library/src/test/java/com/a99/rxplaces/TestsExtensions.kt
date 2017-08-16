@@ -1,7 +1,7 @@
 package com.a99.rxplaces
 
 import com.google.gson.Gson
-import rx.Observable
+import io.reactivex.Observable
 
 internal fun getFakeResponse(): GeocodeResponse {
   val json: String = """
@@ -100,7 +100,7 @@ internal fun getFakeResponse(): GeocodeResponse {
 fun simulateTyping(words: Observable<String>): Observable<String> {
   return words.map { it.toCharArray() }
       .concatMap { charArray ->
-        Observable.from(charArray.toList())
+        Observable.fromIterable(charArray.toList())
             .map { it.toString() }
             .scan { accumulator: String, next: String -> accumulator + next }
       }

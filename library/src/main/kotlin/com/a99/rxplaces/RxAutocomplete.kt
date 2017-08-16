@@ -4,24 +4,23 @@ import android.support.annotation.VisibleForTesting
 import android.util.Log
 import android.widget.TextView
 import com.a99.rxplaces.options.AutocompleteOptions
-import rx.Observable
-import rx.Scheduler
-import rx.schedulers.Schedulers
-import rx.subjects.PublishSubject
+import io.reactivex.*
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
 class RxAutocomplete internal constructor(
-    val scheduler: Scheduler,
-    val repository: PlacesAutocompleteRepository,
-    val logger: (String, String) -> Unit = { _, _ -> }) {
+        val scheduler: Scheduler,
+        val repository: PlacesAutocompleteRepository,
+        val logger: (String, String) -> Unit = { _, _ -> }) {
 
   var minKeyStroke: Int = 3
   var queryInterval: Pair<Long, TimeUnit> = 2L to TimeUnit.SECONDS
 
   private val autocompleteStateSubject = PublishSubject.create<AutocompleteState>()
 
-  fun stateStream(): Observable<AutocompleteState> {
-    return autocompleteStateSubject.onBackpressureLatest()
+  fun stateStream(): Flowable<AutocompleteState> {
+    return autocompleteStateSubject.toFlowable(BackpressureStrategy.LATEST)
   }
 
   fun observe(
@@ -35,8 +34,8 @@ class RxAutocomplete internal constructor(
   }
 
   fun observe(
-      dataSource: Observable<String>,
-      options: AutocompleteOptions = AutocompleteOptions.default()): Observable<List<Prediction>> {
+          dataSource: Observable<String>,
+          options: AutocompleteOptions = AutocompleteOptions.default()): Observable<List<Prediction>> {
 
     return dataSource
         .observeOn(scheduler)
@@ -50,7 +49,7 @@ class RxAutocomplete internal constructor(
               .doOnSuccess { autocompleteStateSubject.onNext(AutocompleteState.SUCCESS) }
               .doOnError { autocompleteStateSubject.onNext(AutocompleteState.FAILURE) }
               .toObservable()
-              .onErrorResumeNext { Observable.empty() }
+//              .onErrorResumeNext { Observable.empty() }
         }
   }
 
@@ -63,9 +62,9 @@ class RxAutocomplete internal constructor(
 
   companion object {
     fun create(
-        apiKey: String,
-        scheduler: Scheduler = Schedulers.io(),
-        logger: (String, String) -> Unit = { tag, message -> Log.d(tag, message) }
+            apiKey: String,
+            scheduler: Scheduler = Schedulers.io(),
+            logger: (String, String) -> Unit = { tag, message -> Log.d(tag, message) }
     ): RxAutocomplete {
       val repository = PlacesAutocompleteRepositoryImpl(apiKey, GoogleMapsApi.create())
       return RxAutocomplete(scheduler, repository, logger)

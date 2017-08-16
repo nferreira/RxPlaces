@@ -1,9 +1,9 @@
 package com.a99.rxplaces
 
-import rx.Observable
+import io.reactivex.Flowable
 
 interface GeocodeRepository {
-  fun reverseGeocode(placeId: String) : Observable<GeocodeResult>
+  fun reverseGeocode(placeId: String) : Flowable<GeocodeResult>
 
   companion object {
     fun create(key: String) : GeocodeRepository {

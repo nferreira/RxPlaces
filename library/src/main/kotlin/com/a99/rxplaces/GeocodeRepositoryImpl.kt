@@ -6,21 +6,20 @@ import com.a99.rxplaces.GoogleMapsApi.Companion.OVER_QUERY_LIMIT
 import com.a99.rxplaces.GoogleMapsApi.Companion.REQUEST_DENIED
 import com.a99.rxplaces.GoogleMapsApi.Companion.UNKNOWN_ERROR
 import com.a99.rxplaces.GoogleMapsApi.Companion.ZERO_RESULTS
-import rx.Observable
-
+import io.reactivex.Flowable
 
 internal class GeocodeRepositoryImpl (val api: GoogleMapsApi, val key: String) : GeocodeRepository {
-  override fun reverseGeocode(placeId: String): Observable<GeocodeResult> {
+  override fun reverseGeocode(placeId: String): Flowable<GeocodeResult> {
     return api.getReverseGeocode(key, placeId)
-        .flatMapObservable {
+        .flatMapPublisher {
           when (it.status) {
-            OK -> Observable.from(it.results)
-            ZERO_RESULTS -> Observable.empty()
-            OVER_QUERY_LIMIT -> Observable.error(OverQueryLimitException(FAILURE_MESSAGE))
-            REQUEST_DENIED -> Observable.error(RequestDeniedException(FAILURE_MESSAGE))
-            INVALID_REQUEST -> Observable.error(InvalidRequestException(FAILURE_MESSAGE))
-            UNKNOWN_ERROR -> Observable.error(UnknownErrorException(FAILURE_MESSAGE))
-            else -> Observable.error(Exception(FAILURE_MESSAGE.plus(" Status: ${it.status}")))
+            OK -> Flowable.fromIterable(it.results)
+            ZERO_RESULTS -> Flowable.empty()
+            OVER_QUERY_LIMIT -> Flowable.error(OverQueryLimitException(FAILURE_MESSAGE))
+            REQUEST_DENIED -> Flowable.error(RequestDeniedException(FAILURE_MESSAGE))
+            INVALID_REQUEST -> Flowable.error(InvalidRequestException(FAILURE_MESSAGE))
+            UNKNOWN_ERROR -> Flowable.error(UnknownErrorException(FAILURE_MESSAGE))
+            else -> Flowable.error(Exception(FAILURE_MESSAGE.plus(" Status: ${it.status}")))
           }
         }
   }
