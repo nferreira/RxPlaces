@@ -37,13 +37,11 @@ class RxAutocomplete internal constructor(
   fun observe(
           dataSource: Observable<String>,
           options: AutocompleteOptions = AutocompleteOptions.default()): Observable<List<Prediction>> {
-      //.lift(createAutoCompleteBufferOperator()).
     return dataSource
         .observeOn(scheduler)
         .doOnNext { logger("RxAutocomplete", "Received: $it") }
-        .buffer(queryInterval.interval(), queryInterval.timeUnit())
-        .filter { it.size > minKeyStroke }
-        .map { it[it.size - 1] }
+        .debounce(queryInterval.interval(), queryInterval.timeUnit())
+        .filter { it.length > minKeyStroke }
         .concatMap { input ->
           repository.query(input, options)
               .doOnSubscribe { logger("RxAutocomplete", "START QUERY: $input") }
