@@ -53,13 +53,6 @@ class RxAutocomplete internal constructor(
         }
   }
 
-  private fun createAutoCompleteBufferOperator(): AutocompleteBufferOperator<String> {
-    return AutocompleteBufferOperator(
-        scheduler = scheduler,
-        timespan = queryInterval
-    )
-  }
-
   companion object {
     fun create(
             apiKey: String,
