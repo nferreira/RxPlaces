@@ -5,6 +5,8 @@ import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.android.MainThreadDisposable
 import io.reactivex.android.MainThreadDisposable.verifyMainThread
+import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
 
 internal class RxTextView {
 
@@ -18,21 +20,15 @@ internal class RxTextView {
 
           textView.addTextChangedListener(watcher)
 
-          subscriber.onUnsubscribe { textView.addTextChangedListener(watcher) }
+          subscriber.setDisposable(Disposables.fromAction {
+              textView.addTextChangedListener(watcher)
+          })
         } catch (t: Throwable) {
           subscriber.onError(t)
         }
       }
 
       return observable
-    }
-
-    infix fun <T> ObservableEmitter<T>.onUnsubscribe(function: () -> Unit) {
-//      add(object : MainThreadDisposable() {
-//        override fun onDispose() {
-//          function()
-//        }
-//      })
     }
   }
 }
